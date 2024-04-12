@@ -1,113 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Create two equal columns that floats next to each other */
+        .column {
+            float: left;
+            width: 50%;
+            padding: 10px;
+            height: 300px;
+            /* Should be removed. Only for demonstration */
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
 
 
-<title>bank amount Redistribution</title>
+    <title>bank amount Redistribution</title>
 </head>
+
 <body>
 
 
+    <div class="row">
 
-<div id="bankData">
-  <h2>bank Data:</h2>
-</div>
+        <div class="column" style="background-color:#bbb;">
+            <h4>Last bank data</h4>
+            <div id="bankData">
+            </div>
+        </div>
+        <div class="column" style="background-color:#aaa;">
+            <div id="bankInputs">
+                <h4>Add new data</h4>
+                <div>
+                    <!-- <label for="bank-hdfc-weight">bank hdfc amount:</label> -->
+                    hdfc : <input type="number" id="bank-hdfc-weight" placeholder="amount for hdfc">
+                </div>
+                <br>
+                <div>
+                    <!-- <label for="bank-icici-weight">bank icici amount:</label> -->
+                    icici : <input type="number" id="bank-icici-weight" placeholder="amount for icici">
+                </div>
+                <br>
+                <div>
+                    <!-- <label for="bank-au-weight">bank au amount:</label> -->
+                    au : <input type="number" id="bank-au-weight" placeholder="amount for au">
+                </div>
+                <br>
+                <div>
+                    <!-- <label for="bank-rbl-weight">bank rbl amount:</label> -->
+                    rbl : <input type="number" id="bank-rbl-weight" placeholder="amount for rbl">
+                </div>
+                <br>
+                <div>
+                    <!-- <label for="bank-idfc-weight">bank idfc amount:</label> -->
+                    idfc : <input type="number" id="bank-idfc-weight" placeholder="amount for idfc">
+                </div>
+                <br>
+                <div>
+                    <!-- <label for="bank-dbs-weight">bank dbs amount:</label> -->
+                    dbs : <input type="number" id="bank-dbs-weight" placeholder="amount for dbs">
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-<h1>bank amount Redistribution</h1>
 
-<div id="currentActions"></div>
 
-<button id="redistributeButton">Redistribute amounts</button>
 
-<!-- Placeholder for displaying the redistribution actions -->
 
-<div id="redistributionActions"></div>
-<div id="finalamounts"></div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const bankes = [
-  { name: 'hdfc', capacity: 10, currentamount: 11 },
-  { name: 'icici', capacity: 10, currentamount: 1 },
-  { name: 'au', capacity: 25, currentamount: 30 },
-  { name: 'rbl', capacity: 10, currentamount: 23 },
-  { name: 'idfc', capacity: 60, currentamount: 40 },
-    { name: 'dbs', capacity: 10, currentamount: 30 },
-];
 
-   function displaybankData(bankes) {
-    const bankDataDiv = document.getElementById('bankData');
-    bankDataDiv.innerHTML += bankes.map(bank => {
-      return `<p>bank ${bank.name.toUpperCase()}: Capacity ${bank.capacity}k, Current amount ${bank.currentamount}k</p>`;
-    }).join('');
-  }
+    <h2>bank amount Redistribution</h2>
 
-  // Call to display bank data on page load
-  displaybankData(bankes);
+    <div id="currentActions"></div>
 
-  function redistributeamounts(bankes) {
-    // Find overfilled and underfilled bankes
-    let overfilledbankes = bankes.filter(bank => bank.currentamount > bank.capacity);
-    let underfilledbankes = bankes.filter(bank => bank.currentamount < bank.capacity);
+    <button id="redistributeButton">Redistribute amounts</button>
 
-    // Store redistribution actions
-    let redistributionActions = [];
+    <!-- Placeholder for displaying the redistribution actions -->
 
-    // Attempt to redistribute from overfilled to underfilled
-    underfilledbankes.forEach(underfilledbank => {
-      let underfillAmount = underfilledbank.capacity - underfilledbank.currentamount;
+    <div id="redistributionActions"></div>
+    <div id="finalamounts"></div>
 
-      overfilledbankes.forEach(overfilledbank => {
-        let overfillAmount = overfilledbank.currentamount - overfilledbank.capacity;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            var bankes = [
+                { name: 'hdfc', capacity: 10, currentamount: 11 },
+                { name: 'icici', capacity: 10, currentamount: 1 },
+                { name: 'au', capacity: 25, currentamount: 30 },
+                { name: 'rbl', capacity: 10, currentamount: 23 },
+                { name: 'idfc', capacity: 60, currentamount: 40 },
+                { name: 'dbs', capacity: 10, currentamount: 30 },
+            ];
 
-        if (underfillAmount > 0 && overfillAmount > 0) {
-          let amountToTransfer = Math.min(underfillAmount, overfillAmount);
-          overfilledbank.currentamount -= amountToTransfer;
-          underfilledbank.currentamount += amountToTransfer;
-          underfillAmount -= amountToTransfer;
+            function updateBoxWeightsFromInputs(boxes) {
+                boxes.forEach(box => {
+                    const weightInput = document.getElementById(`bank-${box.name}-weight`);
+                    if (weightInput) {
+                        const weight = parseInt(weightInput.value, 10);
+                        box.currentamount = isNaN(weight) ? 0 : weight;
+                        // if(!box.currentamount) {
+                        //     box.currentamount = boxes.currentamount;
+                        // }
+                    }
+                });
+                console.log(JSON.stringify(boxes, null, 4))
+            }
 
-          // Record the action
-          redistributionActions.push({
-            from: overfilledbank.name,
-            to: underfilledbank.name,
-            amount: amountToTransfer
-          });
-        }
-      });
-    });
 
-    // Return the updated list of bankes and the actions taken
-    return { bankes, redistributionActions };
-  }
+            function displaybankData(bankes) {
+                const bankDataDiv = document.getElementById('bankData');
+                bankDataDiv.innerHTML += bankes.map(bank => {
+                    return `<p>${bank.name.toUpperCase()}: Capacity ${bank.capacity}k, amount ${bank.currentamount}k</p>`;
+                }).join('');
+            }
 
-  function displayResults(adjustedbankes, redistributionActions) {
-    const finalamountsDiv = document.getElementById('finalamounts');
-    const redistributionActionsDiv = document.getElementById('redistributionActions');
+            //TODO UNCOMMENT
+            displaybankData(bankes);
 
-    // Clear previous results
-    finalamountsDiv.innerHTML = '<h2>Final amounts:</h2>';
-    redistributionActionsDiv.innerHTML = '<h2>Redistribution Actions:</h2>';
+            function redistributeamounts(bankes) {
+                // Find overfilled and underfilled bankes
+                let overfilledbankes = bankes.filter(bank => bank.currentamount > bank.capacity);
+                let underfilledbankes = bankes.filter(bank => bank.currentamount < bank.capacity);
 
-    // Display the final amounts
-    adjustedbankes.forEach(bank => {
-      finalamountsDiv.innerHTML += `<p>bank ${bank.name.toUpperCase()} will have final amount: ${bank.currentamount}k</p>`;
-    });
+                // Store redistribution actions
+                let redistributionActions = [];
 
-    // Display the redistribution actions
-    redistributionActions.forEach(action => {
-      redistributionActionsDiv.innerHTML += `<p>Move ${action.amount*1000} amount from bank ${action.from.toUpperCase()} to bank ${action.to.toUpperCase()}</p>`;
-    });
-  }
+                // Attempt to redistribute from overfilled to underfilled
+                underfilledbankes.forEach(underfilledbank => {
+                    let underfillAmount = underfilledbank.capacity - underfilledbank.currentamount;
 
-  document.getElementById('redistributeButton').addEventListener('click', () => {
-    const result = redistributeamounts(bankes);
-    displayResults(result.bankes, result.redistributionActions);
-  });
-});
-</script>
+                    overfilledbankes.forEach(overfilledbank => {
+                        let overfillAmount = overfilledbank.currentamount - overfilledbank.capacity;
+
+                        if (underfillAmount > 0 && overfillAmount > 0) {
+                            let amountToTransfer = Math.min(underfillAmount, overfillAmount);
+                            overfilledbank.currentamount -= amountToTransfer;
+                            underfilledbank.currentamount += amountToTransfer;
+                            underfillAmount -= amountToTransfer;
+
+                            // Record the action
+                            redistributionActions.push({
+                                from: overfilledbank.name,
+                                to: underfilledbank.name,
+                                amount: amountToTransfer
+                            });
+                        }
+                    });
+                });
+
+                // Return the updated list of bankes and the actions taken
+                return { bankes, redistributionActions };
+            }
+
+            function displayResults(adjustedbankes, redistributionActions) {
+                const finalamountsDiv = document.getElementById('finalamounts');
+                const redistributionActionsDiv = document.getElementById('redistributionActions');
+
+                // Clear previous results
+                finalamountsDiv.innerHTML = '<h2>Final amounts:</h2>';
+                redistributionActionsDiv.innerHTML = '<h2>Redistribution Actions:</h2>';
+
+                // Display the final amounts
+                adjustedbankes.forEach(bank => {
+                    finalamountsDiv.innerHTML += `<p>bank ${bank.name.toUpperCase()} will have final amount: ${bank.currentamount}k</p>`;
+                });
+
+                // Display the redistribution actions
+                redistributionActions.forEach(action => {
+                    redistributionActionsDiv.innerHTML += `<p>Move ${action.amount * 1000} amount from bank ${action.from.toUpperCase()} to bank ${action.to.toUpperCase()}</p>`;
+                });
+            }
+
+            document.getElementById('redistributeButton').addEventListener('click', () => {
+                updateBoxWeightsFromInputs(bankes)
+                const result = redistributeamounts(bankes);
+                displayResults(result.bankes, result.redistributionActions);
+            });
+        });
+    </script>
 
 </body>
+
 </html>
